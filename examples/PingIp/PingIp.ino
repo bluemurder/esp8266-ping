@@ -35,7 +35,7 @@ void setup()
 void loop()
 {
   // Ping Google DNS
-  int responseTime = Pinger::Ping(IpAddress(8, 8, 8, 8));
+  int responseTime = Pinger::Ping(IPAddress(8, 8, 8, 8));
 
   // Print it
   if(responseTime == -1)
@@ -44,7 +44,9 @@ void loop()
   }
   else
   {
-    Serial.println("Echo response received from 8.8.8.8 in %dms", responseTime);
+    Serial.print("Echo response received from 8.8.8.8 in ");
+    Serial.print(responseTime);
+    Serial.print("ms.\n");
   }
 
   // Wait a while
