@@ -51,10 +51,16 @@ public:
 
   // Returns the response time in milliseconds, -1 if error
   int Ping(const char * hostname);
+  
+  // Get last ping statistics
+  ping_resp GetLastPingResponse();
 
 protected:
   // Response time (-1 if error)
   static int m_responseTime;
+  
+  // Ping response
+  static ping_resp m_pingResponse;
 
   // Received ping response callback
   static void ReceivedResponseCallback(void * options, void * response);

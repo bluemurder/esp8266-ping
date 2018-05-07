@@ -32,15 +32,25 @@ void setup()
   // Begin serial connection at 9600 baud
   Serial.begin(9600);
   
-  // Connect to WiFi
+  // Connect to WiFi access point
   bool stationConnected = WiFi.begin(
   "GuaglioWifi",
   "testtesttest");
 
+  // Check if connection errors
   if(!stationConnected)
   {
     Serial.println("Error, unable to connect specified WiFi network.");
   }
+  
+  // Wait connection completed
+  Serial.print("Connecting to AP...");
+  while(WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.print("Ok\n");
 } 
 
 void loop()
@@ -57,9 +67,30 @@ void loop()
   }
   else
   {
+    // Echo response time
     Serial.print("Echo response received from 8.8.8.8 in ");
     Serial.print(responseTime);
     Serial.print("ms.\n");
+
+    // Other statistics
+    ping_resp response = pinger.GetLastPingResponse();
+    Serial.printf("Other statistics:\n"
+                  "  bytes = %d\n"
+                  "  ping_err = %d\n"
+                  "  resp_time = %d\n"
+                  "  seqno = %d\n"
+                  "  timeout_count = %d\n"
+                  "  total_bytes = %d\n"
+                  "  total_count = %d\n"
+                  "  total_time = %d\n",
+                  response.bytes,
+                  response.ping_err,
+                  response.resp_time,
+                  response.seqno,
+                  response.timeout_count,
+                  response.total_bytes,
+                  response.total_count,
+                  response.total_time);
   }
 
   // Wait a while

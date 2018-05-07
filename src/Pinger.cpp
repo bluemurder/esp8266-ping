@@ -33,6 +33,7 @@ extern "C"
 }
 
 int Pinger::m_responseTime = -1;
+ping_resp Pinger::m_pingResponse;
 
 //////////////////////////////////////////////////////////////////////////////
 // Returns the response time in milliseconds, -1 if error
@@ -40,6 +41,7 @@ int Pinger::Ping(IPAddress ip)
 {
   // Reset state
   m_responseTime = -1;
+  memset(&m_pingResponse, 0, sizeof(struct ping_resp));
 
   // Build ping_options structure
   ping_option pingOptions;
@@ -119,37 +121,24 @@ void Pinger::ReceivedResponseCallback(void *, void * response)
   // Check response parameter
   if(response != nullptr)
   {
-
     // Decode response fields
-    ping_resp* pingResponse = reinterpret_cast<struct ping_resp*>(response);
-    if(pingResponse == nullptr)
+    m_pingResponse = *(ping_resp*)response;
+
+    // If errors in response, exit
+    if(m_pingResponse.ping_err != -1)
     {
-
-      // If errors in response, exit
-      if(pingResponse->ping_err != -1)
-      {
-
-        // Update response time
-        m_responseTime = pingResponse->resp_time;
-
-
-          /*Serial.printf("DEBUG: ping reply\n"
-            "\ttotal_count = %d \n"
-            "\tresp_time = %d \n"
-            "\tseqno = %d \n"
-            "\ttimeout_count = %d \n"
-            "\tbytes = %d \n"
-            "\ttotal_bytes = %d \n"
-            "\ttotal_time = %d \n"
-            "\tping_err = %d \n",
-            pingResponse->total_count, pingResponse->resp_time, pingResponse->seqno,
-            pingResponse->timeout_count, pingResponse->bytes, pingResponse->total_bytes,
-            pingResponse->total_time, pingResponse->ping_err);*/
-		
-      }
+      // Update response time
+      m_responseTime = m_pingResponse.resp_time;
     }
   }
 
   // Return to main caller
   esp_schedule();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Get last ping statistics
+ping_resp Pinger::GetLastPingResponse()
+{
+  return m_pingResponse;
 }
