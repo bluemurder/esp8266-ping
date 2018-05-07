@@ -25,17 +25,30 @@ SOFTWARE.
 *****************************************************************************/
 
 #include <Pinger.h>
+#include <ESP8266WiFi.h>
 
 void setup()
 {  
   // Begin serial connection at 9600 baud
   Serial.begin(9600);
+  
+  // Connect to WiFi
+  bool stationConnected = WiFi.begin(
+  "GuaglioWifi",
+  "testtesttest");
+
+  if(!stationConnected)
+  {
+    Serial.println("Error, unable to connect specified WiFi network.");
+  }
 } 
 
 void loop()
 {
+  Pinger pinger;
+
   // Ping Google DNS
-  int responseTime = Pinger::Ping(IPAddress(8, 8, 8, 8));
+  int responseTime = pinger.Ping(IPAddress(8, 8, 8, 8));
 
   // Print it
   if(responseTime == -1)

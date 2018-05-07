@@ -26,6 +26,12 @@ SOFTWARE.
 
 #include "Pinger.h"
 
+extern "C"
+{
+  void esp_schedule();
+  void esp_yield();
+}
+
 int Pinger::m_responseTime = -1;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -38,8 +44,11 @@ int Pinger::Ping(IPAddress ip)
   // Build ping_options structure
   ping_option pingOptions;
 
+  // Reset options
+  memset(&pingOptions, 0, sizeof(struct ping_option));
+
   // Seconds between ping messages
-  pingOptions.coarse_time = 1;
+  pingOptions.coarse_time = 1000;
 
   // Number of ping messages
   pingOptions.count = 1;
@@ -48,7 +57,7 @@ int Pinger::Ping(IPAddress ip)
   pingOptions.ip = ip;
   
   // Callback when response is received
-  pingOptions.recv_function = reinterpret_cast<ping_recv_function>(&ReceivedResponseCallback);
+  pingOptions.recv_function = reinterpret_cast<ping_recv_function>(&Pinger::ReceivedResponseCallback);
 
   // No callback when ping request is sent
   pingOptions.sent_function = nullptr;
@@ -90,8 +99,14 @@ int Pinger::Ping(const char * hostname)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Protected constructor
+// Constructor
 Pinger::Pinger()
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Destructor
+Pinger::~Pinger()
 {
 }
 
@@ -99,26 +114,42 @@ Pinger::Pinger()
 // Received ping response callback
 void Pinger::ReceivedResponseCallback(void *, void * response)
 {
+  m_responseTime = -1;
+
   // Check response parameter
-  if(response == nullptr)
+  if(response != nullptr)
   {
-    // Return to main caller
-    esp_schedule();
+
+    // Decode response fields
+    ping_resp* pingResponse = reinterpret_cast<struct ping_resp*>(response);
+    if(pingResponse == nullptr)
+    {
+
+      // If errors in response, exit
+      if(pingResponse->ping_err != -1)
+      {
+
+        // Update response time
+        m_responseTime = pingResponse->resp_time;
+
+
+          /*Serial.printf("DEBUG: ping reply\n"
+            "\ttotal_count = %d \n"
+            "\tresp_time = %d \n"
+            "\tseqno = %d \n"
+            "\ttimeout_count = %d \n"
+            "\tbytes = %d \n"
+            "\ttotal_bytes = %d \n"
+            "\ttotal_time = %d \n"
+            "\tping_err = %d \n",
+            pingResponse->total_count, pingResponse->resp_time, pingResponse->seqno,
+            pingResponse->timeout_count, pingResponse->bytes, pingResponse->total_bytes,
+            pingResponse->total_time, pingResponse->ping_err);*/
+		
+      }
+    }
   }
 
-  // Decode response fields
-  ping_resp* pingResponse = reinterpret_cast<struct ping_resp*>(response);
-
-  // If errors in response, exit
-  if(pingResponse->ping_err == -1)
-  {
-    // Return to main caller
-    esp_schedule();
-  }
-
-  // Update response time
-  m_responseTime = pingResponse->resp_time;
-  
   // Return to main caller
   esp_schedule();
 }

@@ -40,18 +40,21 @@ extern "C"
 class Pinger
 {
 public:
-  // Returns the response time in milliseconds, -1 if error
-  static int Ping(IPAddress ip);
+  // Constructor
+  Pinger();
+  
+  // Destructor
+  virtual ~Pinger();
 
   // Returns the response time in milliseconds, -1 if error
-  static int Ping(const char * hostname);
+  int Ping(IPAddress ip);
+
+  // Returns the response time in milliseconds, -1 if error
+  int Ping(const char * hostname);
 
 protected:
   // Response time (-1 if error)
   static int m_responseTime;
-
-  // Protected constructor
-  Pinger();
 
   // Received ping response callback
   static void ReceivedResponseCallback(void * options, void * response);
