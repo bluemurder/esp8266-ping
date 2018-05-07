@@ -7,9 +7,11 @@
 ###########################################
 
 Pinger	KEYWORD1
+ping_resp	KEYWORD1
 
 ###########################################
 # Methods and Functions (KEYWORD2)
 ###########################################
 
 Ping	KEYWORD2
+GetLastPingResponse	KEYWORD2
