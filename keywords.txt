@@ -7,11 +7,18 @@
 ###########################################
 
 Pinger	KEYWORD1
-ping_resp	KEYWORD1
+PingerResponse	KEYWORD1
 
 ###########################################
 # Methods and Functions (KEYWORD2)
 ###########################################
 
+Reset	KEYWORD2
+OnReceive	KEYWORD2
+OnEnd	KEYWORD2
 Ping	KEYWORD2
-GetLastPingResponse	KEYWORD2
+SetPacketsId	KEYWORD2
+GetPacketsId	KEYWORD2
+SetEchoPayloadLength	KEYWORD2
+GetEchoPayloadLength	KEYWORD2
+StopPingSequence	KEYWORD2
