@@ -366,6 +366,11 @@ void Pinger::RequestTimeoutOccurred()
       m_pingResponse.MinResponseTime = 0;
       m_pingResponse.MaxResponseTime = 0;
     }
+    else
+    {
+      // Evaluate average response time
+      m_pingResponse.AvgResponseTime /= m_pingResponse.TotalReceivedResponses;
+    }
 
     // Call the end ping requests callback if defined
     if(m_onEnd != nullptr)
